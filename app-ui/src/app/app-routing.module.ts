@@ -4,7 +4,8 @@ import {PublicComponent} from "./public/public.component";
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'public'},
-  { path: 'public', component: PublicComponent}
+  { path: 'public', component: PublicComponent},
+  { path: '**', redirectTo: '/public', pathMatch: 'full' }
 ];
 
 @NgModule({

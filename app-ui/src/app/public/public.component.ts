@@ -30,4 +30,8 @@ export class PublicComponent implements OnInit {
     this.http.post('/api/logout', {})
       .subscribe(() => this.router.navigate(['/']));
   }
+
+  login() {
+    window.open('/login');
+  }
 }

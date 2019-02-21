@@ -13,7 +13,7 @@ export class AjaxRequestInterceptor implements HttpInterceptor {
       }),
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          location.href = '/';
+          window.location.reload();
         }
         return throwError(error);
       })
