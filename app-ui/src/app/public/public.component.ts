@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Router} from "@angular/router";
 
@@ -28,10 +28,7 @@ export class PublicComponent implements OnInit {
 
   logout() {
     this.http.post('/api/logout', {})
-      .subscribe(() => this.router.navigate(['/']));
+      .subscribe(() => window.location.href = '/logout');
   }
 
-  login() {
-    window.open('/login');
-  }
 }

@@ -28,3 +28,4 @@
 # System Files
 .DS_Store
 Thumbs.db
+/etc/cas/logs

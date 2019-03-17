@@ -3,6 +3,7 @@ package pl.tjanek.casspringangulardemo;
 import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
 import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -29,20 +30,20 @@ import javax.servlet.http.HttpSessionEvent;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final String CAS_SERVICE_CHECK = "https://localhost:8443/login/cas";
-    private static final String CAS_SERVER = "https://localhost:18443/cas";
-    private static final String CAS_SERVER_LOGIN = "https://localhost:18443/cas/login";
-    private static final String CAS_SERVER_LOGOUT = "https://localhost:18443/cas/logout";
+    @Value("${cas.service:https://localhost:8443/login/cas}") String casService;
+    @Value("${cas.server:https://localhost:18443/cas}") String casServer;
+    @Value("${cas.logout:https://localhost:18443/cas/logout}") String casLogout;
+    @Value("${cas.login.success:/}") String casLoginSuccess;
 
     @Bean
     AuthenticationSuccessHandler casAuthenticationSuccessHandler() {
-        return new CasAuthenticationSuccessHandler();
+        return new CasAuthenticationSuccessHandler(casLoginSuccess);
     }
 
     @Bean
     public ServiceProperties serviceProperties() {
         ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setService(CAS_SERVICE_CHECK);
+        serviceProperties.setService(casService);
         serviceProperties.setSendRenew(false);
         return serviceProperties;
     }
@@ -64,7 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public Cas20ServiceTicketValidator cas20ServiceTicketValidator() {
-        return new Cas20ServiceTicketValidator(CAS_SERVER);
+        return new Cas20ServiceTicketValidator(casServer);
     }
 
     @Bean
@@ -78,8 +79,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
         CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
-        casAuthenticationEntryPoint.setLoginUrl(CAS_SERVER_LOGIN);
-        casAuthenticationEntryPoint.setServiceProperties(serviceProperties());
         return casAuthenticationEntryPoint;
     }
 
@@ -103,11 +102,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .authenticationEntryPoint(casAuthenticationEntryPoint());
         http
-                .logout().logoutRequestMatcher(new AntPathRequestMatcher("/api/logout", "POST"))
-                .deleteCookies("JSESSIONID")
-                .clearAuthentication(true)
-                .invalidateHttpSession(true);
-        http
                 .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class)
                 .addFilterBefore(logoutFilter(), LogoutFilter.class)
         ;
@@ -130,7 +124,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public LogoutFilter logoutFilter() {
-        LogoutFilter logoutFilter = new LogoutFilter(CAS_SERVER_LOGOUT,  securityContextLogoutHandler());
+        LogoutFilter logoutFilter = new LogoutFilter(casLogout,  securityContextLogoutHandler());
         logoutFilter.setFilterProcessesUrl("/logout/cas");
         return logoutFilter;
     }
@@ -138,7 +132,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public SingleSignOutFilter singleSignOutFilter() {
         SingleSignOutFilter singleSignOutFilter = new SingleSignOutFilter();
-        singleSignOutFilter.setCasServerUrlPrefix(CAS_SERVER);
+        singleSignOutFilter.setCasServerUrlPrefix(casServer);
         singleSignOutFilter.setIgnoreInitConfiguration(true);
         return singleSignOutFilter;
     }

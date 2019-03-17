@@ -13,7 +13,12 @@ import java.io.IOException;
 
 public class CasAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    private final String casLoginSuccess;
+
+    public CasAuthenticationSuccessHandler(String casLoginSuccess) {
+        this.casLoginSuccess = casLoginSuccess;
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -32,7 +37,7 @@ public class CasAuthenticationSuccessHandler implements AuthenticationSuccessHan
             return;
         }
 
-        redirectStrategy.sendRedirect(request, response, "/");
+        redirectStrategy.sendRedirect(request, response, casLoginSuccess);
     }
 
     protected void clearAuthenticationAttributes(HttpServletRequest request) {

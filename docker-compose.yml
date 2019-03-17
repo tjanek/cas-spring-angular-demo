@@ -1,0 +1,31 @@
+version: '2'
+services:
+  cas-app-nginx:
+    build: app-ui/.
+    ports:
+      - "80:80"
+    depends_on:
+      - cas-app-api
+  cas-app-api:
+    build: app-api/.
+    ports:
+      - "8085:8085"
+    depends_on:
+      - cas-app-server
+    environment:
+      CAS_SERVICE: http://localhost/login
+      CAS_SERVER: http://cas-app-server:8080/cas
+      CAS_LOGOUT: http://localhost:8080/cas/logout
+      CAS_LOGIN_SUCCESS: http://localhost
+  cas-app-server:
+    image: apereo/cas:v5.3.2
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      SERVER_PORT: 8080
+      SERVER_SSL_ENABLED: "false"
+      CAS_SERVICE_REGISTRY_INIT_FROM_JSON: "true"
+      CAS_SERVICE_REGISTRY_JSON_LOCATION: file:/etc/cas
+    volumes:
+      - ./etc/cas:/etc/cas
